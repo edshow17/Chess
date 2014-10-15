@@ -1,0 +1,510 @@
+import java.util.HashSet;
+import java.util.Set;
+
+public class chess {
+
+    public static void main (String[] arg) {
+
+		chessMaker(7,2,2,2,0,1);
+		
+    }
+	
+
+	/**
+	 * Calculates the permutations of a String
+	 * @param str    String to calculate the permutations
+ 
+     */
+	public static Set<String> permutationFinder(String str) {
+        Set<String> perm = new HashSet<String>();
+        //Handling error scenarios
+        if (str == null) {
+            return null;
+        } else if (str.length() == 0) {
+            perm.add("");
+            return perm;
+        }
+        char initial = str.charAt(0); // first character
+        String rem = str.substring(1); // Full string without first character
+        Set<String> words = permutationFinder(rem);
+        for (String strNew : words) {
+            for (int i = 0;i<=strNew.length();i++){
+                perm.add(charInsert(strNew, initial, i));
+            }
+        }
+        return perm;
+    }
+ 
+    public static String charInsert(String str, char c, int j) {
+        String begin = str.substring(0, j);
+        String end = str.substring(j);
+        return begin + c + end;
+    }
+	
+	/**
+	 * Check if the position you are looking is safe to insert a piece
+	 * @param board     		actual board
+     * @param i         		position M of the board
+	 * @param j         		position N of the board
+	 * @param boardSize 		size of the board
+	 * @param piece         	piece you do intend to insert
+	 * @param movement          type of movement you are using: 1: King-Like 2: Rook-Like 3: Knight-Like 4: Bishop-Like
+     
+     */
+	public static Boolean look(String[][] board,int i, int j, int boardSize, String piece, int movement) {
+	
+		if(i >= 0 && j >= 0 && i <= (boardSize-1) && j <= (boardSize-1)){
+			
+			if( (board[i][j] == "_")
+			
+			|| ( movement == 4 &&  !piece.equals("B") && !board[i][j].equals("B") 
+			&& !piece.equals("Q") &&  !board[i][j].equals("Q"))
+			
+			|| ( movement == 3 &&  !piece.equals("N") && !board[i][j].equals("N"))
+			
+			|| ( movement == 2 &&  !piece.equals("R") && !board[i][j].equals("R") 
+			&& !piece.equals("Q") &&  !board[i][j].equals("Q"))
+			
+			|| ( movement == 1 &&  !piece.equals("K") && !board[i][j].equals("K"))
+		
+			
+			){
+			
+				return true;
+			}
+			
+		}else{
+			return true;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Check Around the position in a King-Like Move
+	 * @param board     		actual board
+     * @param i         		position M of the board
+	 * @param j         		position N of the board
+	 * @param boardSize 		size of the board
+	 * @param piece         	piece you do intend to insert
+     
+     */
+	public static Boolean lookAround(String[][] board,int i, int j, int boardSize, String piece) {
+	
+			if( look(board,(i-1),(j-1),boardSize,piece,1)){
+					if( look(board,(i-1),(j),boardSize,piece,1)){
+						if( look(board,(i-1),(j+1),boardSize,piece,1)){					
+							if( look(board,(i+1),(j-1),boardSize,piece,1)){																		
+								if( look(board,(i+1),(j),boardSize,piece,1)){																						
+									if( look(board,(i+1),(j+1),boardSize,piece,1)){																												
+										if( look(board,(i),(j-1),boardSize,piece,1)){																																																														
+											if( look(board,(i),(j+1),boardSize,piece,1)){
+													
+													return true;												
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+			}
+		
+		return false;
+	}
+	
+	/**
+	 * Check Around the position in a Rook-Like Move
+	 * @param board     		actual board
+     * @param i         		position M of the board
+	 * @param j         		position N of the board
+	 * @param boardSize 		size of the board
+	 * @param piece         	piece you do intend to insert
+     
+     */
+	public static Boolean lookVH(String[][] board,int i, int j, int boardSize, String piece) {
+	
+		Boolean r1 = true;
+		Boolean r2 = true;
+		Boolean r3 = true;
+		Boolean r4 = true;
+	
+			for(int k=1; k<boardSize; k++){
+				if( !look(board,(i+k),(j),boardSize,piece,2)){
+				
+					r1 = false;												
+				}
+			}
+			
+			for(int k=1; k<boardSize; k++){
+				if( !look(board,(i-k),(j),boardSize,piece,2)){
+				
+					r2 = false;													
+				}
+			}
+			
+			
+			for(int k=1; k<boardSize; k++){
+				if( !look(board,(i),(j+k),boardSize,piece,2)){
+				
+					r3 = false;													
+				}
+			}
+			
+			
+			for(int k=1; k<boardSize; k++){
+				if( !look(board,(i),(j-k),boardSize,piece,2)){
+				
+					r4 = false;													
+				}
+			}
+			
+			if(r1 && r2 && r3 && r4){
+				return true;
+			}
+		
+		return false;
+	}
+	
+	/**
+	 * Check Around the position in a Knight-Like Move
+	 * @param board     		actual board
+     * @param i         		position M of the board
+	 * @param j         		position N of the board
+	 * @param boardSize 		size of the board
+	 * @param piece         	piece you do intend to insert
+     
+     */
+	public static Boolean lookKnight(String[][] board,int i, int j, int boardSize, String piece) {
+	
+		if( look(board,(i-2),(j-1),boardSize,piece,3)){
+			if( look(board,(i-1),(j-2),boardSize,piece,3)){
+				if( look(board,(i+1),(j+2),boardSize,piece,3)){					
+					if( look(board,(i+2),(j+1),boardSize,piece,3)){
+						if( look(board,(i-2),(j+1),boardSize,piece,3)){
+							if( look(board,(i-1),(j+2),boardSize,piece,3)){
+								if( look(board,(i+1),(j-2),boardSize,piece,3)){					
+									if( look(board,(i+2),(j-1),boardSize,piece,3)){	
+									
+										return true;	
+										
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		return false;
+	
+	}
+	
+	/**
+	 * Check Around the position in a Bishop-Like Move
+	 * @param board     		actual board
+     * @param i         		position M of the board
+	 * @param j         		position N of the board
+	 * @param boardSize 		size of the board
+	 * @param piece         	piece you do intend to insert
+     
+     */
+	public static Boolean lookD(String[][] board,int i, int j, int boardSize,String piece) {
+		
+		Boolean b1 = true;
+		Boolean b2 = true;
+		Boolean b3 = true;
+		Boolean b4 = true;
+	
+			for(int k=1; k<boardSize; k++){
+				if( !look(board,(i+k),(j+k),boardSize,piece,4)){
+				
+					b1 = false;												
+				}
+			}
+			
+			for(int k=1; k<boardSize; k++){
+				if( !look(board,(i-k),(j-k),boardSize,piece,4)){
+				
+					b2 = false;													
+				}
+			}
+			
+			
+			for(int k=1; k<boardSize; k++){
+				if( !look(board,(i-k),(j+k),boardSize,piece,4)){
+				
+					b3 = false;													
+				}
+			}
+			
+			
+			for(int k=1; k<boardSize; k++){
+				if( !look(board,(i+k),(j-k),boardSize,piece,4)){
+				
+					b4 = false;													
+				}
+			}
+			
+			
+			if(b1 && b2 && b3 && b4){
+				return true;
+			}
+			
+		return false;
+	}
+	
+	/**
+	 * Check if a position is threaten
+	 * @param board     		actual board
+     * @param i         		position M of the board
+	 * @param j         		position N of the board
+	 * @param boardSize 		size of the board
+	 * @param piece         	piece you do intend to insert
+     
+     */
+	public static Boolean threat(String[][] board,int i, int j,int boardSize, String piece) {
+	
+		if(lookAround(board,i,j,boardSize,piece) 
+		&& lookVH(board,i,j,boardSize,piece) 
+		&& lookD(board,i,j,boardSize,piece)
+		&& lookKnight(board,i,j,boardSize,piece)
+		){
+			return true;
+		}
+
+		return false;
+	}	
+	
+	/**
+	 * Insert a piece
+	 * @param board     		actual board
+	 * @param boardSize 		size of the board
+	 * @param piece         	piece yo do intend to insert
+	 * @param ideviation        deviation of the M dimension: used to look at all the positions of the board
+	 * @param jdeviation        deviation of the N dimension
+     
+     */
+	public static Boolean putPiece(String[][] board, int boardSize, String piece, int ideviation, int jdeviation) {
+	
+		
+		for(int i=ideviation; i<boardSize; i++){
+			for(int j=jdeviation; j<boardSize; j++){
+             
+				if (board[i][j] == "_" && threat(board,i,j,boardSize, piece) ){
+				
+					board[i][j] = piece;
+					return true;
+				
+				}
+				
+			}
+        }
+		
+		for(int i=ideviation; i>=0; i--){
+			for(int j=jdeviation; j>=0; j--){
+             
+				if (board[i][j] == "_" && threat(board,i,j,boardSize, piece) ){
+				
+					board[i][j] = piece;
+					return true;
+				
+				}
+				
+			}
+        }
+		
+		for(int i=ideviation; i<boardSize; i++){
+			for(int j=jdeviation; j>=0; j--){
+             
+				if (board[i][j] == "_" && threat(board,i,j,boardSize, piece) ){
+				
+					board[i][j] = piece;
+					return true;
+				
+				}
+				
+			}
+        }
+		
+		for(int i=ideviation; i>=0; i--){
+			for(int j=jdeviation; j<boardSize; j++){
+             
+				if (board[i][j] == "_" && threat(board,i,j,boardSize, piece) ){
+				
+					board[i][j] = piece;
+					return true;
+				
+				}
+				
+			}
+        }
+
+		return true;
+    }
+	
+	/**
+	 * Resets the variables regarding the board
+	 * @param board     		actual board
+     * @param Result         	final board to print
+	 * @param boardSize 		size of the board
+     
+     */
+	public static void resetBoard(String[][] board, String[] Result, int boardSize){
+		
+			for(int i=0; i<boardSize; i++){
+				for(int j=0; j<boardSize; j++){
+				 
+					board[i][j] = "_";
+					
+				}
+			}
+			
+			for(int i=0; i<boardSize; i++){
+			  
+					Result[i] = " ";
+				
+			}
+		
+	}
+	
+	/**
+	 * Print a possible boards
+	 * @param board     		actual board
+     * @param Result         	final board to print
+	 * @param boardSize 		size of the board
+	 * @param perm         		actual permutation of the pieces
+	 * @param kings         	number of kings
+	 * @param queens         	number of queens
+	 * @param bishops         	number of bishops
+	 * @param rooks         	number of rooks
+	 * @param knights         	number of knights
+     
+     */
+	public static int printBoard(String[][] board, String[] Result, int boardSize, String perm
+	,int kings, int queens, int bishops, int rooks, int knights, String[] Duplicates, int numberOfBoards
+	, int ideviation, int jdeviation){
+	
+		int pieces = 0;
+		
+		for(int i=0; i<perm.length(); i++){
+		
+			putPiece(board,boardSize,perm.substring(i,i+1),ideviation,jdeviation);
+			
+		}
+		
+		for(int i=0; i<boardSize; i++){
+			for(int j=0; j<boardSize; j++){
+				if(!board[i][j].equals("_")){pieces++;}
+			}
+		}
+		
+	
+		if(pieces == kings + queens + bishops + rooks + knights){
+		
+			for(int i=0; i<boardSize; i++){
+				for(int j=0; j<boardSize; j++){
+					Duplicates[numberOfBoards] = Duplicates[numberOfBoards] + board[i][j];
+				}
+			}
+			
+			for(int i=0; i<numberOfBoards; i++){
+				if (Duplicates[i].equals(Duplicates[numberOfBoards]))
+					Duplicates[numberOfBoards] = "";
+			}
+			
+			if (!Duplicates[numberOfBoards].equals("")) {
+				
+					numberOfBoards++;
+			
+			
+					for(int i=0; i<boardSize; i++){
+						for(int j=0; j<boardSize; j++){
+			  
+							Result[i] = Result[i] + " " + board[i][j];
+
+						}
+						
+							System.out.println(Result[i]);
+					}
+				System.out.println("");
+				System.out.println("");
+				System.out.println("");
+			}
+		}
+		
+		return numberOfBoards;
+	}
+	
+	/**
+	 * Main procedure to calculate the possible boards
+	 * @param boardSize 		size of the board
+	 * @param kings         	number of kings
+	 * @param queens         	number of queens
+	 * @param bishops         	number of bishops
+	 * @param rooks         	number of rooks
+	 * @param knights         	number of knights
+     
+     */
+	public static void chessMaker(int boardSize, int kings, int queens, int bishops, int rooks, int knights){
+		
+		//String to allocate the boards
+		String[][] board = new String[boardSize][boardSize];
+		
+		//String to print the boards
+		String[] Result = new String[boardSize];
+		
+		//String used to remove the possible duplicates
+		String[] Duplicates = new String[boardSize*boardSize*boardSize*boardSize*boardSize];
+		
+		for(int i=0; i<boardSize*boardSize*boardSize*boardSize*boardSize; i++){
+			  
+			Duplicates[i] = "";
+				
+		}
+		
+		int numberOfBoards = 0;
+		
+		String permutations = "";
+		
+		for(int i=1; i<=kings; i++){
+			permutations = permutations + "K";
+		}
+		
+		for(int i=1; i<=queens; i++){
+			permutations = permutations + "Q";
+		}
+		
+		for(int i=1; i<=bishops; i++){
+			permutations = permutations + "B";
+		}
+		
+		for(int i=1; i<=rooks; i++){
+			permutations = permutations + "R";
+		}
+		
+		for(int i=1; i<=knights; i++){
+			permutations = permutations + "N";
+		}
+		
+	
+		String[] perm =  permutationFinder(permutations).toArray(new String[permutationFinder(permutations).size()]);
+		
+		
+		
+		for(int i=0; i<boardSize; i++){
+			for(int j=0; j<boardSize; j++){
+				for(int k=0; k<perm.length; k++){
+					resetBoard(board,Result,boardSize);
+					
+					numberOfBoards = printBoard(board,Result,boardSize, perm[k], kings,  queens,  bishops,  rooks,  knights
+					, Duplicates,numberOfBoards,i,j);
+				
+				
+				}
+			}
+		}
+		
+	}
+}
