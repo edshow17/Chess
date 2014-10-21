@@ -10,6 +10,8 @@ import java.io.Writer;
 
 import java.lang.Math.*;
 
+import java.util.*;
+
 public class chess {
 
     public static void main (String[] arg) {
@@ -369,7 +371,7 @@ public class chess {
 		}
 		
 
-		return true;
+		return false;
     }
 	
 	/**
@@ -399,29 +401,28 @@ public class chess {
 	
 	/**
 	 * Print a possible boards
-	 * @param board     		actual board
-     * @param Result         	final board to print
-	 * @param boardSize 		size of the board
-	 * @param perm         		actual permutation of the pieces
-	 * @param kings         	number of kings
-	 * @param queens         	number of queens
-	 * @param bishops         	number of bishops
-	 * @param rooks         	number of rooks
-	 * @param knights         	number of knights
-	 * @param Duplicates        String with the duplicates results
-	 * @param numberOfBoards    number of successful boards
-	 * @param writer   			used to write on a file
-	 * @param permi    			actual permutation of the M position
-	 * @param permj    			actual permutation of the N position
+	 * @param board     			actual board
+     * @param Result         		final board to print
+	 * @param boardSize 			size of the board
+	 * @param perm         			actual permutation of the pieces
+	 * @param piecesSelected   		Number of pieces selected
+	 * @param Duplicates        	String with the duplicates results
+	 * @param numberOfBoards    	number of successful boards
+	 * @param writer   				used to write on a file
+	 * @param permi    				actual permutation of the M position
+	 * @param permj    				actual permutation of the N position
+	 * @paramuniqueConfigurations	List with the unique Configurations
      
      */
-	public static int printBoard(String[][] board, String[] Result, int boardSize, String perm
-	,int kings, int queens, int bishops, int rooks, int knights, String[] Duplicates, int numberOfBoards
-	, Writer writer, String permi,String permj){
+	 
+	 @SuppressWarnings({"unchecked"})
+	public static LinkedList printBoard(String[][] board, String[] Result, int boardSize, String perm
+	,int piecesSelected, Writer writer, String permi,String permj, LinkedList uniqueConfigurations){
 	
 
 		int pieces = 0;
 		
+		String uniqueConfiguration = "";
 		
 		for(int i=0; i<perm.length(); i++){
 			if(i>boardSize-1){
@@ -437,66 +438,46 @@ public class chess {
 		
 		for(int i=0; i<boardSize; i++){
 			for(int j=0; j<boardSize; j++){
+				uniqueConfiguration = uniqueConfiguration + board[i][j];
 				if(!board[i][j].equals("_")){pieces++;}
 			}
 		}
 		
 	
-		if(pieces == kings + queens + bishops + rooks + knights){
-		
-			for(int i=0; i<boardSize; i++){
-				for(int j=0; j<boardSize; j++){
-					Duplicates[numberOfBoards] = Duplicates[numberOfBoards] + board[i][j];
-				}
-			}
-			
-			for(int i=0; i<numberOfBoards; i++){
-				if (Duplicates[i].equals(Duplicates[numberOfBoards]))
-					Duplicates[numberOfBoards] = "";
-			}
-			
-			if (!Duplicates[numberOfBoards].equals("")) {
-				
-					numberOfBoards++;
-					//System.out.println(numberOfBoards);
+		if(pieces == piecesSelected){
 			
 			
+			Boolean found = uniqueConfigurations.removeFirstOccurrence(uniqueConfiguration);
+			uniqueConfigurations.add(uniqueConfiguration);	
+
+			if(!found){					
 					for(int i=0; i<boardSize; i++){
 						for(int j=0; j<boardSize; j++){
 			  
 							Result[i] = Result[i] + " " + board[i][j];
 
-
 						}
 						try {
 							writer.write(Result[i]+"\n");
 						} catch (IOException e) {
-						System.err.println("Problem writing");
-						}
-					}
-					    try {
-							writer.write(""+"\n");
-							writer.write(""+"\n");
-							writer.write(""+"\n");
-	
-							} catch (IOException e) {
 							System.err.println("Problem writing");
 						}
+					}
+					    
+					try {
+						writer.write(""+"\n");
+						writer.write(""+"\n");
+						writer.write(""+"\n");
+
+					} catch (IOException e) {
+						System.err.println("Problem writing");
+					}
 			}
 		}
 		
-		return numberOfBoards;
+		return uniqueConfigurations;
 	}
-	
-	public static Boolean diffetentCombi(String combi, int pieces){
-		
-			for(int i=0; i<pieces; i++){
-				if (!combi.contains(Integer.toString(i))){
-					return false;
-				}
-			}
-		return true;
-	}
+
 
 	
 	/**
@@ -509,12 +490,14 @@ public class chess {
 	 * @param knights         	number of knights
      
      */
+	 
+	 @SuppressWarnings({"unchecked"})
 	public static void chessMaker(int boardSize, int kings, int queens, int bishops, int rooks, int knights){
 		try {
 		File statText = new File("C:/result.txt");
         FileOutputStream is = new FileOutputStream(statText);
         OutputStreamWriter osw = new OutputStreamWriter(is);    
-        Writer w = new BufferedWriter(osw);
+        Writer writer = new BufferedWriter(osw);
 		
 		
 		//String to allocate the boards
@@ -523,20 +506,14 @@ public class chess {
 		//String to print the boards
 		String[] Result = new String[boardSize];
 		
-		//String used to remove the possible duplicates
-		String[] Duplicates = new String[(int) (Math.pow((double)boardSize,(double)(boardSize+1)))];
+		int piecesSelected = kings + queens + bishops +rooks + knights;
+		
+		LinkedList  uniqueConfigurations = new LinkedList();	
 		
 		Set<String> numberPermutation = new HashSet<String>();
 		
 		char[] positionPermutations = new char[boardSize];
 		
-		for(int i=0; i<Duplicates.length; i++){
-			  
-			Duplicates[i] = "";
-				
-		}
-		
-		int numberOfBoards = 0;
 		
 		String permutations = "";
 		
@@ -561,38 +538,35 @@ public class chess {
 		}
 		
 	
-		
 		for(int i=0; i< boardSize; i++){
 			positionPermutations[i] = Character.forDigit(i, 10);
 		}
 		
-
-
         printAllKLength(positionPermutations,boardSize,numberPermutation);
 	
 		String[] perm  =   permutationFinder(permutations).toArray(new String[permutationFinder(permutations).size()]);
 		String[] permi =   numberPermutation.toArray(new String[numberPermutation.size()]);
 		String[] permj =   numberPermutation.toArray(new String[numberPermutation.size()]);
-	
 
-		for(int k=0; k<1; k++){	
-			for(int i=0; i<permi.length; i++){
-				if(diffetentCombi(permi[i],boardSize)){
-					for(int j=0; j<permj.length; j++){
-						if( diffetentCombi(permj[j],boardSize)){
-							resetBoard(board,Result,boardSize);
+	
+		
+		for(int i=0; i<permi.length; i++){
+			for(int j=0; j<permj.length; j++){
+				for(int k=0; k<1; k++){
 				
-							numberOfBoards = printBoard(board,Result,boardSize, perm[k], kings,  queens,  bishops,  rooks,  knights
-							, Duplicates,numberOfBoards,w,permi[i],permj[j]);
-						}
-					}
+						resetBoard(board,Result,boardSize);
+					
+						uniqueConfigurations = printBoard(board,Result,boardSize, perm[k], piecesSelected
+						,writer,permi[i],permj[j],uniqueConfigurations);
+				
+				
 				}
 			}
-		
 		}
 		
+		System.out.println("Number of different Configurations: " + uniqueConfigurations.size());
 		
-		w.close();
+		writer.close();
 		
 		} catch (IOException e) {
         System.err.println("Problem writing");
